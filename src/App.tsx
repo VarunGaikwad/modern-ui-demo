@@ -22,7 +22,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen bg-orange-600">
+    <div className="flex flex-col h-screen bg-orange-300">
       <AppBar />
       <AppBody />
     </div>

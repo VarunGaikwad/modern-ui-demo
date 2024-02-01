@@ -1,25 +1,23 @@
-import { useState } from "react";
 import Button from "../components/Button";
 import axios from "axios";
-import { baseUrl } from "../global/globalData";
+import { baseUrl, getProperty, setProperty } from "../global/globalData";
 
 export default function Home() {
-  const [payload, setPayload] = useState({}),
-    onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      setPayload((oldPayload) => ({
-        ...oldPayload,
+  const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setProperty("task_payload", {
         task_name: event.target.value,
-      }));
+      });
     },
     onFormSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
       event.preventDefault();
       try {
-        const response = await axios.post(`${baseUrl}/odata/v4/todo/MyTask`, {
-          ...payload,
-          has_completed: false,
-          due_date: new Date().toISOString().split("T")[0],
-          assign_to: "Me",
-        });
+        const payload = getProperty("task_payload") || {},
+          response = await axios.post(`${baseUrl}/odata/v4/todo/MyTask`, {
+            ...payload,
+            has_completed: false,
+            due_date: new Date().toISOString().split("T")[0],
+            assign_to: "Me",
+          });
 
         console.log("Response from the server:", response.data);
       } catch (error) {
