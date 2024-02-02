@@ -1,27 +1,43 @@
 import Button from "../components/Button";
 import axios from "axios";
-import { baseUrl, getProperty, setProperty } from "../global/globalData";
+import { baseUrl, globalModel } from "../global/globalData";
+import { useState } from "react";
+import Toast from "../components/Toast";
+
+type varientType = "success" | "error" | "warning";
 
 export default function Home() {
-  const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      setProperty("task_payload", {
-        task_name: event.target.value,
-      });
+  const [varient, setVarient] = useState<varientType>("success"),
+    [showToast, setShowToast] = useState(false),
+    [message, setMessage] = useState<string>(""),
+    [taskName, setTaskName] = useState(globalModel?.task_name || ""),
+    onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setTaskName(event.target.value);
+    },
+    onShowMessageToast = (toastMessage: string, toastVarient: varientType) => {
+      setShowToast(true);
+      setMessage(toastMessage);
+      setVarient(toastVarient);
+
+      setTimeout(() => {
+        setShowToast(false);
+        setMessage("");
+        setVarient("success");
+      }, 3000);
     },
     onFormSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
       event.preventDefault();
       try {
-        const payload = getProperty("task_payload") || {},
-          response = await axios.post(`${baseUrl}/odata/v4/todo/MyTask`, {
-            ...payload,
-            has_completed: false,
-            due_date: new Date().toISOString().split("T")[0],
-            assign_to: "Me",
-          });
-
-        console.log("Response from the server:", response.data);
+        const response = await axios.post(`${baseUrl}/odata/v4/todo/MyTask`, {
+          task_name: taskName,
+          has_completed: false,
+          due_date: new Date().toDateString(),
+          assign_to: "ME",
+        });
+        onShowMessageToast(JSON.stringify(response.data), "success");
       } catch (error) {
         console.error("Error making POST request:", error);
+        onShowMessageToast(JSON.stringify(error.message), "error");
       }
     };
 
@@ -29,12 +45,21 @@ export default function Home() {
     <div>
       <form onSubmit={onFormSubmit}>
         <input
+          value={taskName}
           onChange={onInputChange}
           name="task_name"
           className="p-2 focus:outline-none"
         />
         <Button type="submit" text="Submit" />
       </form>
+      <Toast
+        message={message}
+        showToast={showToast}
+        varient={varient}
+        onClose={() => {
+          setShowToast(false);
+        }}
+      />
     </div>
   );
 }

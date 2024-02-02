@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function Sidebar() {
-  const [pathName, setPathName] = useState(window.location.pathname),
+  const { pathname } = useLocation(),
+    [pathName, setPathName] = useState(pathname),
     menu = [
       {
         text: "My Home",
