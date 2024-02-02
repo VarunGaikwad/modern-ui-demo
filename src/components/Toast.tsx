@@ -1,8 +1,9 @@
-type ToastType = {
+export type varientType = "success" | "error" | "warning";
+export type ToastType = {
   message: string;
   showToast: boolean;
   onClose: () => void;
-  varient?: "success" | "error" | "warning";
+  varient?: varientType;
 };
 
 export default function Toast({

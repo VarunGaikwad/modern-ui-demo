@@ -2,9 +2,9 @@ import Button from "../components/Button";
 import axios from "axios";
 import { baseUrl, globalModel } from "../global/globalData";
 import { useState } from "react";
-import Toast from "../components/Toast";
+import Toast, { varientType } from "../components/Toast";
 
-type varientType = "success" | "error" | "warning";
+
 
 export default function Home() {
   const [varient, setVarient] = useState<varientType>("success"),
@@ -35,8 +35,8 @@ export default function Home() {
           assign_to: "ME",
         });
         onShowMessageToast(JSON.stringify(response.data), "success");
-      } catch (error) {
-        console.error("Error making POST request:", error);
+      } catch (e) {
+        let error = e as Error;
         onShowMessageToast(JSON.stringify(error.message), "error");
       }
     };
