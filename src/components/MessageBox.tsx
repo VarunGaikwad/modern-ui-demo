@@ -12,21 +12,15 @@ export interface MessageBoxType {
   onClose: () => void;
 }
 
+export interface MessageBoxWithoutClose
+  extends Omit<MessageBoxType, "onClose"> {}
+
 export default function MessageBox({
   type,
   title,
   description,
   onClose,
 }: MessageBoxType) {
-  const boxStyles = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "10px",
-    borderRadius: "5px",
-    margin: "10px 0",
-  };
-
   let backgroundColor: string, icon: ReactElement | null;
   switch (type) {
     case "success":
@@ -47,20 +41,18 @@ export default function MessageBox({
   }
 
   return (
-    <div className="fixed top-0 right-0">
+    <div className="fixed top-0 right-0 m-2">
       <div
-        className={`flex items-center justify-center border-r-8 mx-10 text-white`}
+        style={{ backgroundColor }}
+        className="flex items-center justify-center text-white p-2 rounded-2xl"
       >
-        {icon && <div className="mr-2">{icon}</div>}
+        {icon && <div className="ml-2 mr-4">{icon}</div>}
         <div>
           <div className="font-bold">{title}</div>
           <div>{description}</div>
         </div>
-        <button
-          onClick={onClose}
-          className="ml-2 bg-transparent border-none cursor-pointer"
-        >
-          <IconButton icon={CloseIcon} />
+        <button className="ml-10 bg-transparent border-none cursor-pointer">
+          <IconButton onClick={onClose} icon={CloseIcon} />
         </button>
       </div>
     </div>

@@ -1,26 +1,47 @@
 import Button from "../components/Button";
 import axios from "axios";
-import { baseUrl, globalModel } from "../global/globalData";
-import { useState } from "react";
-import MessageBox, { MessageBoxType } from "../components/MessageBox";
+import { TaskItemType, baseUrl, globalModel } from "../global/globalData";
+import { useEffect, useState } from "react";
+import MessageBox, {
+  MessageBoxType,
+  MessageBoxWithoutClose,
+} from "../components/MessageBox";
 
 export default function Home() {
-  const [messageBoxData, setMessageBoxData] = useState<MessageBoxType | null>(
-      null
-    ),
+  const [taskItem, setTaskItem] = useState<TaskItemType[]>([]),
+    [messageBoxData, setMessageBoxData] = useState<MessageBoxType | null>(null),
     [taskName, setTaskName] = useState(globalModel?.task_name || ""),
     onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       setTaskName(event.target.value);
+    },
+    onOpenMessageBox = ({
+      title,
+      description,
+      type,
+    }: MessageBoxWithoutClose) => {
+      setMessageBoxData({
+        title: title,
+        description: description,
+        type: type,
+        onClose: () => {
+          setMessageBoxData(null);
+        },
+      });
+    },
+    onListDelete = () => {},
+    onFetchItem = async () => {
+      const { data } = await axios.get(`${baseUrl}/odata/v4/todo/MyTask`),
+        { value } = data;
+      setTaskItem(value);
     },
     onFormSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
       event.preventDefault();
 
       if (!taskName) {
-        setMessageBoxData({
+        onOpenMessageBox({
           title: "Warning",
           description: "Input field is blank.",
           type: "warning",
-          onClose: () => setMessageBoxData(null),
         });
 
         return;
@@ -36,22 +57,27 @@ export default function Home() {
           assign_to: "ME",
         });
 
-        setMessageBoxData({
+        onOpenMessageBox({
           title: "Success",
           description: response.statusText,
           type: "success",
-          onClose: () => setMessageBoxData(null),
         });
       } catch (_error) {
         const error = _error as Error;
-        setMessageBoxData({
+
+        onOpenMessageBox({
           title: "Error",
           description: error.message,
           type: "error",
-          onClose: () => setMessageBoxData(null),
         });
+      } finally {
+        setTaskName("");
       }
     };
+
+  useEffect(() => {
+    onFetchItem();
+  }, []);
 
   return (
     <div>
@@ -59,6 +85,7 @@ export default function Home() {
         <div className="mb-4 flex items-center">
           <input
             type="text"
+            value={taskName}
             id="task_name"
             name="task_name"
             onChange={onInputChange}
@@ -68,6 +95,31 @@ export default function Home() {
           <Button type="submit" text="Submit" />
         </div>
       </form>
+
+      <div className="container mx-auto my-8 p-8 bg-white shadow-md rounded-md">
+        <h2 className="text-xl font-bold mb-2">My Task</h2>
+        <ul className="max-h-80 overflow-y-auto">
+          {taskItem.map((item) => (
+            <li className="flex items-center justify-between bg-gray-200 p-4 mb-4 rounded">
+              <span>{item.task_name}</span>
+              <span className="flex justify-between w-1/5">
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded"
+                  onClick={onListDelete}
+                >
+                  Edit
+                </button>
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded"
+                  onClick={onListDelete}
+                >
+                  Delete
+                </button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {messageBoxData && (
         <MessageBox

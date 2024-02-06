@@ -4,4 +4,12 @@ const isDev = window.location.href.includes("localhost"),
     task_name: "",
   };
 
+export interface TaskItemType {
+  ID: string;
+  assign_to: string;
+  due_date: Date;
+  has_completed: boolean;
+  task_name: string;
+}
+
 export { baseUrl, globalModel };
